@@ -16,7 +16,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     env:
-      RUSTFLAGS: -D warnings
+      RUSTFLAGS: -D warnings -C linker=rust-lld -C linker-flavor=ld.lld
       CARGO_INCREMENTAL: 0
       RUSTUP_MAX_RETRIES: 10
       CARGO_NET_RETRY: 10
@@ -34,11 +34,11 @@ jobs:
       run: Rename-Item C:\Users\runneradmin\.rustup\toolchains\stable-x86_64-pc-windows-msvc C:\Users\runneradmin\.rustup\toolchains\stable-x86_64-pc-windows-msvc.old
 
     - name: Install Rust toolchain
-      uses: actions-rs/toolchain@v1
+      uses: qmx/toolchain@multi-target
       with:
         toolchain: stable
         profile: minimal
-        target: x86_64-unknown-linux-musl
+        targets: x86_64-unknown-linux-musl, armv7-unknown-linux-musleabihf
         override: true
 
     - name: Install Nodejs
@@ -51,6 +51,10 @@ jobs:
       if: github.event_name == 'push'
       run: cargo xtask dist
 
+    - name: Dist (armv7)
+      if: matrix.os == 'ubuntu-latest' and github.event_name == 'push'
+      run: cargo build -p rust-analyzer --target armv7-unknown-linux-musleabihf
+
     - name: Dist
       if: github.event_name != 'push'
       run: cargo xtask dist --nightly
@@ -60,6 +64,7 @@ jobs:
       with:
         name: dist-${{ matrix.os }}
         path: ./dist
+
 
   publish:
     name: publish
