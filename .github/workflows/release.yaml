@@ -17,7 +17,6 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     env:
-      RUSTFLAGS: -D warnings -C linker=rust-lld -C linker-flavor=ld.lld
       CARGO_INCREMENTAL: 0
       RUSTUP_MAX_RETRIES: 10
       CARGO_NET_RETRY: 10
@@ -54,6 +53,8 @@ jobs:
 
     - name: Dist (armv7)
       if: matrix.os == 'ubuntu-latest' && github.event_name == 'push'
+      env:
+        RUSTFLAGS: -D warnings -C linker=rust-lld -C linker-flavor=ld.lld
       run: cargo build -p rust-analyzer --target armv7-unknown-linux-musleabihf
 
     - name: Dist
